@@ -5,6 +5,7 @@ dependencies:
   - python=3.12
   - bottleneck
   - ca-certificates
+  - cartopy
   - certifi
   - ipython
   - metpy
@@ -14,6 +15,7 @@ dependencies:
   - netcdf4
   - openssl
   - pre-commit
+  - seaborn
   - sphinx
   - sphinx-autobuild
   - xarray
