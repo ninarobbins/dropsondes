@@ -39,6 +39,7 @@ colors = plot_utils.get_colors(dict_ds_c.keys())
 # prepare xticks in rh plot
 axes[1].set_xlim(0, 1)
 xticks = axes[1].get_xticks().tolist()
+xtick_labels = [np.round(curr, 1) for curr in xticks]
 xtick_colors = ["black"] * len(xticks)
 counter = 0  # needed for positions of annotations
 
@@ -80,7 +81,7 @@ for circle, ds_c in dict_ds_c.items():
         300, 7500 - (counter + 1) * 500, f"{circle}: {int(fl_mean)}m", color=color
     )
     # add xticks rh
-    xtick_labels = [np.round(curr, 1) for curr in xticks] + [""]
+    xtick_labels = xtick_labels + [""]
     xticks = xticks + [max_rh["rh"].mean()]
     xtick_colors = xtick_colors + [colors[circle]]
     # add lines rh
