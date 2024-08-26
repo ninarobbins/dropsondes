@@ -41,6 +41,8 @@ axes[1].set_xlim(0, 1)
 xticks = axes[1].get_xticks().tolist()
 xtick_colors = ["black"] * len(xticks)
 counter = 0  # needed for positions of annotations
+
+sns.despine(offset=10)
 for circle, ds_c in dict_ds_c.items():
     # remove nan sondes
     ds_c = (
@@ -118,7 +120,6 @@ axes[0].set_ylabel(
     f'{ds_c[alt_var].attrs['long_name']} / {ds_c[alt_var].attrs['units']} '
 )
 axes[0].legend()
-sns.despine(offset=10)
 for ax in axes[1:].flatten():
     ax.set_ylabel("")
 fig.tight_layout()
