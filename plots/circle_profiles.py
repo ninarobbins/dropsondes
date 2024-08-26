@@ -25,7 +25,7 @@ dict_ds_c = data_utils.get_circle_data(ds, flight_id)
 # %%
 plt_variables = ["theta", "rh", "u", "v"]
 plt_units = ["K", "%", r"m s$^{-1}$", r"m s$^{-1}$"]
-alt_var = "alt"
+alt_var = "gpsalt"
 
 # %%
 fig, axes = plt.subplots(ncols=len(plt_variables), figsize=(18, 6))
@@ -43,7 +43,11 @@ xtick_colors = ["black"] * len(xticks)
 counter = 0  # needed for positions of annotations
 for circle, ds_c in dict_ds_c.items():
     # remove nan sondes
-    ds_c = ds_c.where(ds_c["ta"].isnull().sum(dim=alt_var) < 1300, drop=True)
+    ds_c = (
+        ds_c.where(ds_c["ta"].isnull().sum(dim=alt_var) < 1300, drop=True)
+        .where(ds_c["rh"].isnull().sum(dim=alt_var) < 1300, drop=True)
+        .where(ds_c["p"].isnull().sum(dim=alt_var) < 1300, drop=True)
+    )
     nb_sondes = ds_c.sizes["sonde_id"]
     color = colors[circle]
     print(f"Circle {circle} has {nb_sondes} valid sondes")
@@ -54,10 +58,12 @@ for circle, ds_c in dict_ds_c.items():
         ax.set_xlabel(f"{plt_var} / {unit}")
 
     # calculate annotations
-    fl_mean, fl_ind = physics.get_levels_circle(ds_c)
-    max_rh = physics.get_rh_max_circle(ds_c, hmin=8000)
-    lcl_pressure, lcl_temperature = physics.get_lcl_circle(ds_c)
-    indices = physics.get_heights_from_array(ds_c["p"], values=lcl_pressure.magnitude)
+    fl_mean, fl_ind = physics.get_levels_circle(ds_c, alt_var=alt_var)
+    max_rh = physics.get_rh_max_circle(ds_c, hmin=8000, alt_var=alt_var)
+    lcl_pressure, lcl_temperature = physics.get_lcl_circle(ds_c, alt_var=alt_var)
+    indices = physics.get_heights_from_array(
+        ds_c["p"], values=lcl_pressure.magnitude, alt_var=alt_var
+    )
     lcl_height = ds_c[alt_var].isel({alt_var: indices}).values
     # add yticks freezing
     ytick_labels = ytick_labels + [""] * nb_sondes

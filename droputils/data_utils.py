@@ -16,17 +16,21 @@ def get_l3_path(config, flight_id="20240811", platform="HALO"):
     """
     get l3 filename for a flight from config file
     """
-    l3_file = os.path.join(
+    l3_file = (
         os.path.join(
-            config["MANDATORY"]["data_directory"],
-            config["OPTIONAL"]["path_to_l0_files"].format(
-                platform="HALO", flight_id=flight_id
+            os.path.join(
+                config["MANDATORY"]["data_directory"],
+                config["OPTIONAL"]["path_to_l0_files"].format(
+                    platform="HALO", flight_id=flight_id
+                ),
             ),
-        ),
-        config["processor.Gridded.get_l3_filename"]["l3_filename_template"].format(
-            platform=platform, flight_id=flight_id
-        ),
-    ).replace("Level_0", "Level_3")
+            config["processor.Gridded.get_l3_filename"]["l3_filename_template"].format(
+                platform=platform
+            ),
+        )
+        .replace("Level_0", "Level_3")
+        .replace(f"/{flight_id}", "")
+    )
     return l3_file
 
 
