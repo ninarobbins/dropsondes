@@ -7,6 +7,7 @@ def get_rh_max_circle(ds, hmin=8000, alt_var="alt"):
     """
     Get maximum RH above a certain height
     """
+
     ds_cut = ds.where(ds[alt_var] >= hmin, drop=True).mean("sonde_id")
     max_rh_sonde = ds_cut["rh"].max(dim=alt_var).values
     rh_idx_sonde = np.abs(ds_cut["rh"] - max_rh_sonde).argmin(dim=alt_var)
@@ -49,9 +50,11 @@ def get_lcl_circle(ds, min_h=0, max_h=200, alt_var="alt"):
     temperature = base_values["ta"].values * units.kelvin
     pressure = base_values["p"].values * units.Pa
     rh = (base_values["rh"] * 100).values * units.percent
-    mask = ~np.isnan(temperature)
+    mask_t = ~np.isnan(temperature)
+    mask_p = ~np.isnan(pressure)
+    mask = mask_t & mask_p
     dewpoint = mpcalc.dewpoint_from_relative_humidity(temperature[mask], rh[mask])
-
+    print(pressure[mask])
     lcl_pressure, lcl_temperature = mpcalc.lcl(
         pressure[mask], temperature[mask], dewpoint
     )

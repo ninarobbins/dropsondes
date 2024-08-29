@@ -68,6 +68,7 @@ for circle, ds_c in dict_ds_c.items():
         ds_c["p"], values=lcl_pressure.magnitude, alt_var=alt_var
     )
     lcl_height = ds_c[alt_var].isel({alt_var: indices}).values
+    print(f"{circle} LCL: {lcl_height}")
     # add yticks freezing
     ytick_labels = ytick_labels + [""] * nb_sondes
     yticks = yticks + fl_ind.tolist()
@@ -127,6 +128,7 @@ fig.tight_layout()
 
 
 quicklook_path = os.path.dirname(l3_path.replace("Level_3", "Quicklooks"))
+os.makedirs(quicklook_path, exist_ok=True)
 fig.savefig(f"{quicklook_path}/{flight_id}_circle_profiles.png", dpi=80)
 
 

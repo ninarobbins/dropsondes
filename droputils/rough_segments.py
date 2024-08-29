@@ -7,6 +7,7 @@ starts = {
     "20240822": dict(
         south="12:50", center="13:55", north="16:30", atr1="17:08", atr2="18:48"
     ),
+    "20240827": dict(south="11:56", center="13:02", north="14:45"),
 }
 ends = {
     "20240811": dict(south="15:20", center="17:15", north="18:23", atr="19:59"),
@@ -17,4 +18,5 @@ ends = {
     "20240822": dict(
         south="13:49", center="14:56", north="17:01", atr1="18:05", atr2="19:20"
     ),
+    "20240827": dict(south="12:56", center="14:15", north="15:47"),
 }
