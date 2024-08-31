@@ -66,6 +66,9 @@ none_soundings.hmix_grad_theta_v.plot.scatter(
     x="launch_time", ax=ax, c="grey", label="none"
 )
 
+ax.axhline(y=400, linestyle="--", c="dodgerblue", alpha=0.3)
+ax.axhline(y=500, linestyle="--", c="red", alpha=0.3)
+
 ax.legend(loc="upper right")
 ax.set_xlabel("Date", fontsize=fs)
 ax.set_ylabel(r"$H_{mix}$ from $\theta_v$", fontsize=fs)
