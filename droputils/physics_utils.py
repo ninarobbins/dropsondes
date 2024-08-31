@@ -84,3 +84,36 @@ def add_iwv(ds):
     ds["iwv"] = (["launch_time"], iwv)
 
     return ds
+
+
+def add_theta(ds):
+    """
+    Function to estimate potential temperature from the temperature and pressure in the given dataset.
+    """
+    theta = mpcalc.potential_temperature(
+        ds.p.values * units.Pa, ds.ta.values * units.kelvin
+    )
+    ds = ds.assign(theta=(ds.ta.dims, theta.magnitude))
+    ds["theta"].attrs = dict(
+        standard_name="potential temperature",
+        long_name="potential temperature",
+        units=str(theta.units),
+    )
+
+    return ds
+
+
+def add_theta_v(ds):
+    mr = mpcalc.mixing_ratio_from_specific_humidity(ds.q)
+    theta_v = mpcalc.virtual_potential_temperature(
+        ds.p.values * units.Pa, ds.ta.values * units.kelvin, mr
+    )
+
+    ds = ds.assign(theta_v=(ds.ta.dims, theta_v.magnitude))
+    ds["theta_v"].attrs = dict(
+        standard_name="virtual potential temperature",
+        long_name="virtual potential temperature",
+        units=str(theta_v.units),
+    )
+
+    return ds
