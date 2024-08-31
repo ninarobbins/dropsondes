@@ -4,11 +4,16 @@ import xarray as xr
 from datetime import datetime
 import cartopy.crs as ccrs
 import matplotlib.ticker as mticker
-import metpy.calc as mpcalc
-from metpy.units import units
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from orcestra.flightplan import LatLon, path_preview
 from orcestra.weathermaps import goes_overlay, dropsondes_overlay
+
+import sys
+
+sys.path.append("./")
+sys.path.append("../")
+from droputils.physics_utils import add_iwv
+
 
 # -------------------------------------------
 ################ PLOT FLIGHT ################
@@ -99,21 +104,7 @@ dropsonde_ds = dropsonde_ds.assign_coords(
 dropsonde_ds = dropsonde_ds.sel(launch_time="2024-08-11")
 
 # Compute IWV
-iwv = [None] * len(dropsonde_ds["launch_time"])
-
-for i in range(len(dropsonde_ds["launch_time"])):
-    try:
-        iwv[i] = mpcalc.precipitable_water(
-            dropsonde_ds.p.isel(launch_time=i).values * units.Pa,
-            mpcalc.dewpoint_from_relative_humidity(
-                dropsonde_ds.ta[i], dropsonde_ds.rh[i]
-            ).data.magnitude
-            * units.degC,
-        ).magnitude
-    except ValueError:
-        continue
-
-dropsonde_ds["iwv"] = (["launch_time"], iwv)
+dropsonde_ds = add_iwv(dropsonde_ds)
 
 dropsondes_overlay(
     dropsonde_ds,
