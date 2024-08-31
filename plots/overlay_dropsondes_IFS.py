@@ -20,8 +20,8 @@ import easygems.healpix as egh
 flight_time = datetime(2024, 8, 11, 15, 0, 0)
 flight_time_str = flight_time.strftime("%Y-%m-%d")
 flight_index = f"HALO-{flight_time.strftime('%Y%m%d')}"
-flight_date = flight_index[5:9] + flight_index[9:11] + flight_index[11:13]
-
+flight_id = flight_index[5:9] + flight_index[9:11] + flight_index[11:13]
+flight_date = flight_index[5:9] + "-" + flight_index[9:11] + "-" + flight_index[11:13]
 
 try:
     tracks = xr.open_dataset(
@@ -161,6 +161,6 @@ cbar.set_label(variable_label)
 
 # Save
 plt.savefig(
-    f"/Users/ninarobbins/Desktop/PhD/ORCESTRA/Figures/dropsondes/HALO-{flight_date}a/IWV_dropsondes_IFS_PERCUSION_HALO_{flight_date}.png",
+    f"/Users/ninarobbins/Desktop/PhD/ORCESTRA/Figures/dropsondes/HALO-{flight_id}a/IWV_dropsondes_IFS_PERCUSION_HALO_{flight_id}.png",
     bbox_inches="tight",
 )

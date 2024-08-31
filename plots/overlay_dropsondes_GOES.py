@@ -19,8 +19,8 @@ flight_time = datetime(2024, 8, 11, 12, 0, 0)
 sat_time_str = flight_time.strftime("%Y-%m-%d %H:%M")
 flight_time_str = flight_time.strftime("%Y-%m-%d")
 flight_name = f"HALO-{flight_time.strftime('%Y%m%d')}a"
-
-flight_date = flight_name[5:9] + flight_name[9:11] + flight_name[11:13]
+flight_id = flight_name[5:9] + flight_name[9:11] + flight_name[11:13]
+flight_date = flight_name[5:9] + "-" + flight_name[9:11] + "-" + flight_name[11:13]
 
 try:
     tracks = xr.open_dataset(
@@ -149,6 +149,6 @@ cbar.set_label(variable_label)
 
 # Save
 plt.savefig(
-    f"/Users/ninarobbins/Desktop/PhD/ORCESTRA/Figures/dropsondes/HALO-{flight_date}a/IWV_dropsondes_GOES_PERCUSION_HALO_{flight_date}.png",
+    f"/Users/ninarobbins/Desktop/PhD/ORCESTRA/Figures/dropsondes/HALO-{flight_id}a/IWV_dropsondes_GOES_PERCUSION_HALO_{flight_id}.png",
     bbox_inches="tight",
 )
