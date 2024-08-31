@@ -86,6 +86,22 @@ def add_iwv(ds):
     return ds
 
 
+def add_mr(ds):
+    """
+    Function to estimate mixing ratio from specific humidity in the given dataset.
+    """
+    mr = mpcalc.mixing_ratio_from_specific_humidity(ds.q)
+
+    ds = ds.assign(mr=(ds.ta.dims, mr.data))
+    ds["mr"].attrs = dict(
+        standard_name="mixing ratio",
+        long_name="mixing ratio",
+        units=r"kg kg$^{-1}$",
+    )
+
+    return ds
+
+
 def add_theta(ds):
     """
     Function to estimate potential temperature from the temperature and pressure in the given dataset.
@@ -104,6 +120,9 @@ def add_theta(ds):
 
 
 def add_theta_v(ds):
+    """
+    Function to estimate virtual potential temperature in the given dataset.
+    """
     mr = mpcalc.mixing_ratio_from_specific_humidity(ds.q)
     theta_v = mpcalc.virtual_potential_temperature(
         ds.p.values * units.Pa, ds.ta.values * units.kelvin, mr
@@ -115,5 +134,81 @@ def add_theta_v(ds):
         long_name="virtual potential temperature",
         units=str(theta_v.units),
     )
+
+    return ds
+
+
+def add_density(ds):
+    """
+    Function to estimate density in the given dataset.
+    """
+    mr = mpcalc.mixing_ratio_from_specific_humidity(ds.q)
+
+    density = (0.622 * ds.p * (1 + mr)) / (287.053 * ds.ta * (mr + 0.622))
+
+    ds = ds.assign(density=(ds.ta.dims, density.data))
+    ds["density"].attrs = dict(
+        standard_name="density",
+        long_name="density",
+        units=r"kg m${-1}$",
+    )
+
+    return ds
+
+
+# Calculate Hmix
+def find_ml_height_from_gradient(
+    ds,
+    var,
+    threshold,
+    time="launch_time",
+    altitude="alt",
+    lower_lim_m=100.0,
+):
+    def _calculateHmix_var(density_profile, var_profile, threshold, lower_lim_m):
+        # size = len(sonde.alt)
+        var_diff = 0
+        numer = 0
+        denom = 0
+        var_mix = 0
+
+        k = int(lower_lim_m / 10)  # lower limit index (height = index * 10m)
+
+        while abs(var_diff) < threshold:
+            numer += 0.5 * (
+                density_profile[k + 1].values * var_profile[k + 1].values
+                + density_profile[k].values * var_profile[k].values
+            )
+            denom += 0.5 * (density_profile[k + 1].values + density_profile[k].values)
+            var_mix = numer / denom
+            k += 1
+            var_diff = var_profile[k].values - var_mix
+
+        hmix = var_profile[altitude].values[k]
+
+        return hmix
+
+    # call inner function
+    hmix_vec = np.zeros(len(ds[time]))
+    for i in range(len(ds[time])):
+        density_profile = (
+            ds["density"]
+            .isel({time: i})
+            .interpolate_na(dim=altitude)
+            .rolling({altitude: 4}, center=True)
+            .mean()
+        )
+        var_profile = (
+            ds[var].isel({time: i}).interpolate_na(dim=altitude)
+        )  # .rolling({altitude: 4}, center=True).mean()
+        hmix_vec[i] = _calculateHmix_var(
+            density_profile, var_profile, threshold, lower_lim_m
+        )
+    k = int(lower_lim_m / 10) + 2
+    hmix_vec[hmix_vec == k * 10] = np.nan
+
+    # assign variable to dataset
+    ds = ds.assign({f"hmix_grad_{var}": ((time), hmix_vec)})
+    ds = ds.assign_attrs({f"hmix_threshold_{var}": threshold})
 
     return ds
