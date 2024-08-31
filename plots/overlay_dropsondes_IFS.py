@@ -6,13 +6,13 @@ import cartopy.crs as ccrs
 import metpy.calc as mpcalc
 from metpy.units import units
 import matplotlib.ticker as mticker
-from matplotlib import colors
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 from orcestra.flightplan import LatLon, path_preview, plot_cwv
+from orcestra.weathermaps import dropsondes_overlay
 import intake
 import easygems.healpix as egh
+
 
 # -------------------------------------------
 ################ PLOT FLIGHT ################
@@ -100,6 +100,7 @@ level_3_path = "/Users/ninarobbins/Desktop/PhD/Dropsondes/data/Level_3/Level_3.n
 dropsonde_ds = (
     xr.open_dataset(level_3_path)
     .rename({"launch_time_(UTC)": "launch_time"})
+    .rename({"gpsalt": "alt"})
     .swap_dims({"sonde_id": "launch_time"})
 )
 
@@ -128,36 +129,16 @@ for i in range(len(dropsonde_ds["launch_time"])):
 
 dropsonde_ds["iwv"] = (["launch_time"], iwv)
 
-variable = "iwv"
-variable_label = r"Integrated Water Vapor / kg m$^{-2}$"
-alpha = 1
-vmin = 45
-vmax = 70
-nlevels = 9
-
-cmap = plt.cm.Blues
-levels = np.linspace(vmin, vmax, nlevels)
-norm = colors.BoundaryNorm(levels, cmap.N)
-
-im_launches = ax.scatter(
-    dropsonde_ds["lon"].isel(gpsalt=10),
-    dropsonde_ds["lat"].isel(gpsalt=10),
-    marker="o",
+dropsondes_overlay(
+    dropsonde_ds,
+    ax,
+    variable="iwv",
+    variable_label=r"Integrated Water Vapor / kg m$^{-2}$",
+    colormap="Blues",
+    markershape="o",
+    markersize=40,
     edgecolor="grey",
-    s=40,
-    transform=ccrs.PlateCarree(),
-    c=dropsonde_ds[variable],
-    cmap="Blues",
-    zorder=10,
-    norm=norm,
 )
-
-divider = make_axes_locatable(ax)
-cax = divider.append_axes("bottom", size="3%", pad=0.4, axes_class=plt.Axes)
-cbar = plt.colorbar(im_launches, cax=cax, orientation="horizontal", ticks=levels)
-cbar.set_label(variable_label)
-cbar.set_ticks(levels)
-cbar.set_label(variable_label)
 
 # Save
 plt.savefig(
