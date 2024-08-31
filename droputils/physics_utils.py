@@ -60,3 +60,27 @@ def get_lcl_circle(ds, min_h=0, max_h=200, alt_var="alt"):
     )
 
     return lcl_pressure, lcl_temperature
+
+
+def add_iwv(ds):
+    """
+    Compute IWV and add it to the dataset.
+    """
+
+    iwv = [None] * len(ds["launch_time"])
+
+    for i in range(len(ds["launch_time"])):
+        try:
+            iwv[i] = mpcalc.precipitable_water(
+                ds.p.isel(launch_time=i).values * units.Pa,
+                mpcalc.dewpoint_from_relative_humidity(
+                    ds.ta[i], ds.rh[i]
+                ).data.magnitude
+                * units.degC,
+            ).magnitude
+        except ValueError:
+            continue
+
+    ds["iwv"] = (["launch_time"], iwv)
+
+    return ds

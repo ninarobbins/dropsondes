@@ -101,7 +101,7 @@ dropsonde_ds = dropsonde_ds.assign_coords(
     launch_time=("launch_time", launch_time_datetimes)
 )
 
-dropsonde_ds = dropsonde_ds.sel(launch_time="2024-08-11")
+dropsonde_ds = dropsonde_ds.sel(launch_time=flight_date)
 
 # Compute IWV
 dropsonde_ds = add_iwv(dropsonde_ds)
