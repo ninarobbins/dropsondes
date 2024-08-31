@@ -71,7 +71,7 @@ ax.axhline(y=500, linestyle="--", c="red", alpha=0.3)
 
 ax.legend(loc="upper right")
 ax.set_xlabel("Date", fontsize=fs)
-ax.set_ylabel(r"$H_{mix}$ from $\theta_v$", fontsize=fs)
+ax.set_ylabel(r"$H_{mix}$ from $\theta_v$ / m", fontsize=fs)
 ax.tick_params(axis="both", labelsize=fs - 2)
 ax.spines["right"].set_visible(False)
 ax.spines["top"].set_visible(False)
