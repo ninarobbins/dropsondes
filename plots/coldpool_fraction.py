@@ -1,7 +1,7 @@
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
-
+import pandas as pd
 
 import sys
 
@@ -54,6 +54,11 @@ none_soundings = dropsonde_ds.where(
     dropsonde_ds.hmix_grad_theta_v > 400, drop=True
 ).where(dropsonde_ds.hmix_grad_theta_v < 500, drop=True)
 
+print(
+    "Average cold pool fraction = ",
+    len(cp_soundings.launch_time) / len(dropsonde_ds.launch_time),
+)
+
 # Calculate cold pool fraction
 dates = [
     pd.Timestamp(t).date().strftime("%Y-%m-%d") for t in dropsonde_ds.launch_time.values
@@ -64,7 +69,11 @@ print(dates)
 daily_cp_fraction = np.full(len(dates), np.nan)
 for i, date in enumerate(dates):
     cp_fraction = len(cp_soundings.sel(launch_time=date).launch_time) / len(
-        dropsonde_ds.sel(launch_time=date).launch_time
+        dropsonde_ds.sel(launch_time=date)
+        .where(
+            ~np.isnan(dropsonde_ds.sel(launch_time=date).hmix_grad_theta_v), drop=True
+        )
+        .launch_time
     )
     daily_cp_fraction[i] = cp_fraction
 
